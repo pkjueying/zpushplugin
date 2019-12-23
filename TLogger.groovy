@@ -1,3 +1,6 @@
+/**
+ * for Log
+ */
 class TLogger {
     private static final String TAG = "zpush-plugin"
     private static boolean DEBUG = false
