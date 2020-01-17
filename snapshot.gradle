@@ -1,0 +1,78 @@
+// push aar to oss.jfrog.org as snapshot
+
+#distributionUrl=https\://services.gradle.org/distributions/gradle-5.4.1-all.zip
+#distributionUrl=https\://services.gradle.org/distributions/gradle-5.1.1-all.zip
+#distributionUrl=https\://services.gradle.org/distributions/gradle-4.10.1-all.zip
+
+#distributionUrl=https\://services.gradle.org/distributions/gradle-4.6-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-4.4-all.zip
+#distributionUrl=https\://services.gradle.org/distributions/gradle-4.1-all.zip
+
+# cannot support
+#distributionUrl=https\://services.gradle.org/distributions/gradle-3.3-all.zip
+
+
+// classpath 'com.android.tools.build:gradle:3.5.0'
+// classpath 'com.android.tools.build:gradle:3.4.0'
+// classpath 'com.android.tools.build:gradle:3.3.0'
+
+// classpath 'com.android.tools.build:gradle:3.2.0'
+classpath 'com.android.tools.build:gradle:3.1.0'
+// classpath 'com.android.tools.build:gradle:3.0.0'
+
+// cannot support
+// classpath 'com.android.tools.build:gradle:2.3.0'
+
+// apply plugin: 'com.jfrog.artifactory'
+//classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.5.4'
+//classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.13.0'
+
+
+project('pro_name') {
+    artifactoryPublish.dependsOn('build')
+    publishing {
+        publications {
+            aar(MavenPublication) {
+                groupId = PROJ_GROUP
+                artifactId = PROJ_ARTIFACTID
+                version = PROJ_VERSION
+                // Tell maven to prepare the generated "*.aar" file for publishing
+                artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+            }
+        }
+    }
+
+    artifactoryPublish {
+        publications(publishing.publications.aar)
+    }
+}
+
+artifactory {
+    contextUrl = "${ARTIFACTORY_CONTEXTURL}"
+    publish {
+        repository {
+            repoKey = "${ARTIFACTORY_REPOKEY}"
+            username = "${ARTIFACTORY_USER}"
+            password = "${ARTIFACTORY_PASSWORD}"
+
+            maven = true
+        }
+        defaults {
+            // Reference to Gradle publications defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publishArtifacts = true
+            // Properties to be attached to the published artifacts.
+            properties = ['qa.level': 'basic', 'dev.team' : 'core']
+            publishPom = true // Publish generated POM files to Artifactory (true by default)
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-release'
+            username = "${ARTIFACTORY_USER}"
+            password = "${ARTIFACTORY_PASSWORD}"
+            maven = true
+        }
+    }
+}
